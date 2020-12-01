@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="colorPrimary">#3F51B5</color>
+    <color name="colorPost">#0091EA</color>
+    <color name="colorPrimaryDark">#303F9F</color>
+    <color name="colorAccent">#E25E14</color>
+    <color name="colorAccentTrans">#BEE25E14</color>
+
+    <color name="maincolor">#E25E14</color>
+
+    <color name="yellow">#feeb3c</color>
+    <color name="white">#fff</color>
+    <color name="semitranswhitecolor">#00FFFFFF</color>
+    <color name="colorwhite_50">#CCffffff</color>
+    <color name="colorwhite_10">#1Affffff</color>
+    <color name="colorwhite_30">#4Dffffff</color>
+    <color name="black">#2F2F2F</color>
+    <color name="graycolor">#D3D3D3</color>
+    <color name="graycolor2">#C5C4C4</color>
+    <color name="gainsboro">#DCDCDC</color>
+    <color name="lightgraycolor">#f2f2f2</color>
+    <color name="darkgray">#93959A</color>
+    <color name="darkgraytrans">#9493959A</color>
+    <color name="darkgraytransPost">#9BC5C6C9</color>
+    <color name="dimgray">#696969</color>
+    <color name="lightblack">#5d5d5d</color>
+
+    <color name="delete_message_bg">#f2f2f2</color>
+    <color name="delete_message_text">#b8b8b8</color>
+
+    <color name="transparent">#00ffffff</color>
+    <color name="fifty_transparent_black">#802F2F2F</color>
+
+    <color name="redcolor">#ff0008</color>
+    <color name="semitransredcolor">#93FF0008</color>
+    <color name="semitransredcolornew">#918E8E</color>
+
+    <color name="color_gray_alpha">#65b7b7b7</color>
+    <color name="app_blue">#0e1f2f</color>
+    <color name="text_color">#000000</color>
+    <color name="seekbar_color">#3be3e3</color>
+    <color name="line_color">#FF15FF00</color>
+    <color name="shadow_color">#00000000</color>
+
+    <color name="app_color">#c52127</color>
+
+
+
+
+</resources>
