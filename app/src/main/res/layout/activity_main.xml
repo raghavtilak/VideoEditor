@@ -23,7 +23,7 @@
             android:layout_centerInParent="true"
             android:background="@color/transparent"
             android:text="Select Video"
-            android:id="@+id/cancel_button"/>
+            android:id="@+id/selectVideo"/>
 
     </RelativeLayout>
 
