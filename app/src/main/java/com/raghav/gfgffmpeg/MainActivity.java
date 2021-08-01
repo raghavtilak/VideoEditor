@@ -90,11 +90,11 @@ public class MainActivity extends AppCompatActivity {
                     try {
                         slowMotion(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
                     } catch (Exception e) {
-                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
                         e.printStackTrace();
                     }
                 } else
-                    Toast.makeText(MainActivity.this, "Please upload video", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Please upload video", Toast.LENGTH_LONG).show();
             }
         });
         fast.setOnClickListener(new View.OnClickListener() {
@@ -106,10 +106,10 @@ public class MainActivity extends AppCompatActivity {
                         fastForward(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
                     }
                 } else
-                    Toast.makeText(MainActivity.this, "Please upload video", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Please upload video", Toast.LENGTH_LONG).show();
             }
         });
         reverse.setOnClickListener(new View.OnClickListener() {
@@ -120,10 +120,10 @@ public class MainActivity extends AppCompatActivity {
                         reverse(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
                     } catch (Exception e) {
                         e.printStackTrace();
-                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
+                        Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_LONG).show();
                     }
                 } else
-                    Toast.makeText(MainActivity.this, "Please upload video", Toast.LENGTH_SHORT).show();
+                    Toast.makeText(MainActivity.this, "Please upload video", Toast.LENGTH_LONG).show();
             }
         });
 
@@ -256,13 +256,13 @@ public class MainActivity extends AppCompatActivity {
                     video_url = filePath;
                     //play the result video in VideoView
                     videoView.start();
-                    //remove the progress dialog
-                    progressDialog.dismiss();
+
                 } else if (returnCode == RETURN_CODE_CANCEL) {
                     Log.i(TAG, "Async command execution cancelled by user.");
                 } else {
                     Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
                 }
+                progressDialog.dismiss();
             }
         });
     }
@@ -280,14 +280,14 @@ public class MainActivity extends AppCompatActivity {
         String fileExtn = ".mp4";
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 
-            ContentValues valuesvideos = new ContentValues();
-            valuesvideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
-            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
-            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
-            valuesvideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
-            valuesvideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
-            valuesvideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
-            Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesvideos);
+            ContentValues valuesVideos = new ContentValues();
+            valuesVideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
+            valuesVideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
+            valuesVideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
+            valuesVideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+            valuesVideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
+            valuesVideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
+            Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesVideos);
             File file = FileUtils.getFileFromUri(this, uri);
             filePath = file.getAbsolutePath();
 
@@ -313,13 +313,13 @@ public class MainActivity extends AppCompatActivity {
                     videoView.setVideoURI(Uri.parse(filePath));
                     video_url = filePath;
                     videoView.start();
-                    progressDialog.dismiss();
 
                 } else if (returnCode == RETURN_CODE_CANCEL) {
-                    Log.i(TAG, "Async command execution cancelled by user.");
+                    Log.i(TAG, "Execution cancelled by user.");
                 } else {
-                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
+                    Log.e(TAG, String.format("Execution failed returnCode=%d i=%s %s", returnCode, video_url, filePath));
                 }
+                progressDialog.dismiss();
             }
         });
     }
@@ -370,12 +370,12 @@ public class MainActivity extends AppCompatActivity {
                     videoView.setVideoURI(Uri.parse(filePath));
                     video_url = filePath;
                     videoView.start();
-                    progressDialog.dismiss();
                 } else if (returnCode == RETURN_CODE_CANCEL) {
                     Log.i(TAG, "Async command execution cancelled by user.");
                 } else {
                     Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
                 }
+                progressDialog.dismiss();
             }
         });
     }
