@@ -1,5 +1,8 @@
 package com.raghav.gfgffmpeg;
 
+import static com.arthenica.mobileffmpeg.Config.RETURN_CODE_CANCEL;
+import static com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -17,21 +20,19 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageButton;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
-import com.arthenica.mobileffmpeg.Config;
 import com.arthenica.mobileffmpeg.ExecuteCallback;
 import com.arthenica.mobileffmpeg.FFmpeg;
+
 import org.florescu.android.rangeseekbar.RangeSeekBar;
+
 import java.io.File;
-import static com.arthenica.mobileffmpeg.Config.RETURN_CODE_CANCEL;
-import static com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS;
 
 public class MainActivity extends AppCompatActivity {
 
+    private final String TAG = MainActivity.class.getSimpleName();
     private final int REQUEST_TAKE_GALLERY_VIDEO = 123;
     private ImageButton reverse,slow,fast;
     private Button selectVideo;
@@ -41,8 +42,8 @@ public class MainActivity extends AppCompatActivity {
     private VideoView videoView;
     private Runnable r;
     private RangeSeekBar rangeSeekBar;
-    private static final String root= Environment.getExternalStorageDirectory().toString();
-    private static final String app_folder=root+"/GFG/";
+    private static final String root = Environment.getExternalStorageDirectory().toString();
+    private static final String app_folder = root + "/GFG/";
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -87,7 +88,7 @@ public class MainActivity extends AppCompatActivity {
                 if (video_url != null) {
                     //a try-catch block to handle all necessary exceptions like File not found, IOException
                     try {
-                        slowmotion(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
+                        slowMotion(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
                     } catch (Exception e) {
                         Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
                         e.printStackTrace();
@@ -102,7 +103,7 @@ public class MainActivity extends AppCompatActivity {
                 if (video_url != null) {
 
                     try {
-                        fastforward(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
+                        fastForward(rangeSeekBar.getSelectedMinValue().intValue() * 1000, rangeSeekBar.getSelectedMaxValue().intValue() * 1000);
                     } catch (Exception e) {
                         e.printStackTrace();
                         Toast.makeText(MainActivity.this, e.toString(), Toast.LENGTH_SHORT).show();
@@ -181,11 +182,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
 
-
     /**
      * Method for creating fast motion video
      */
-    private void fastforward(int startMs, int endMs) throws Exception {
+    private void fastForward(int startMs, int endMs) {
           /* startMs is the starting time, from where we have to apply the effect.
   	         endMs is the ending time, till where we have to apply effect.
    	         For example, we have a video of 5min and we only want to fast forward a part of video
@@ -206,18 +206,18 @@ public class MainActivity extends AppCompatActivity {
              */
             ContentValues valuesvideos = new ContentValues();
             valuesvideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
-            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix+System.currentTimeMillis());
-            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix+System.currentTimeMillis()+fileExtn);
+            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
+            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
             valuesvideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
             valuesvideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
             valuesvideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
             Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesvideos);
 
             //get the path of the video file created in the storage.
-            File file=FileUtils.getFileFromUri(this,uri);
-            filePath=file.getAbsolutePath();
+            File file = FileUtils.getFileFromUri(this, uri);
+            filePath = file.getAbsolutePath();
 
-        }else {
+        } else {
             //This else statement will work for devices with Android version lower than 10
             //Here, "app_folder" is the path to your app's root directory in device storage
             File dest = new File(new File(app_folder), filePrefix + fileExtn);
@@ -233,7 +233,7 @@ public class MainActivity extends AppCompatActivity {
         String exe;
         //the "exe" string contains the command to process video.The details of command are discussed later in this post.
         // "video_url" is the url of video which you want to edit. You can get this url from intent by selecting any video from gallery.
-        exe="-y -i " +video_url+" -filter_complex [0:v]trim=0:"+startMs/1000+",setpts=PTS-STARTPTS[v1];[0:v]trim="+startMs/1000+":"+endMs/1000+",setpts=0.5*(PTS-STARTPTS)[v2];[0:v]trim="+(endMs/1000)+",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:"+(startMs/1000)+",asetpts=PTS-STARTPTS[a1];[0:a]atrim="+(startMs/1000)+":"+(endMs/1000)+",asetpts=PTS-STARTPTS,atempo=2[a2];[0:a]atrim="+(endMs/1000)+",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 "+"-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast "+filePath;
+        exe = "-y -i " + video_url + " -filter_complex [0:v]trim=0:" + startMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",setpts=0.5*(PTS-STARTPTS)[v2];[0:v]trim=" + (endMs / 1000) + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + (startMs / 1000) + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + (startMs / 1000) + ":" + (endMs / 1000) + ",asetpts=PTS-STARTPTS,atempo=2[a2];[0:a]atrim=" + (endMs / 1000) + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath;
 
         /*
             Here, we have used he Async task to execute our query because if we use the regular method the progress dialog
@@ -259,19 +259,19 @@ public class MainActivity extends AppCompatActivity {
                     //remove the progress dialog
                     progressDialog.dismiss();
                 } else if (returnCode == RETURN_CODE_CANCEL) {
-                    Log.i(Config.TAG, "Async command execution cancelled by user.");
+                    Log.i(TAG, "Async command execution cancelled by user.");
                 } else {
-                    Log.i(Config.TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
+                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
                 }
             }
         });
     }
 
     /**
-      Method for creating slow motion video for specific part of the video
-      The below code is same as above only the command in string "exe" is changed.
-    */
-    private void slowmotion(int startMs, int endMs) throws Exception {
+     * Method for creating slow motion video for specific part of the video
+     * The below code is same as above only the command in string "exe" is changed.
+     */
+    private void slowMotion(int startMs, int endMs) throws Exception {
 
         progressDialog.show();
 
@@ -282,16 +282,16 @@ public class MainActivity extends AppCompatActivity {
 
             ContentValues valuesvideos = new ContentValues();
             valuesvideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
-            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix+System.currentTimeMillis());
-            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix+System.currentTimeMillis()+fileExtn);
+            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
+            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
             valuesvideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
             valuesvideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
             valuesvideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
             Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesvideos);
-            File file=FileUtils.getFileFromUri(this,uri);
-            filePath=file.getAbsolutePath();
+            File file = FileUtils.getFileFromUri(this, uri);
+            filePath = file.getAbsolutePath();
 
-        }else {
+        } else {
 
             File dest = new File(new File(app_folder), filePrefix + fileExtn);
             int fileNo = 0;
@@ -302,7 +302,7 @@ public class MainActivity extends AppCompatActivity {
             filePath = dest.getAbsolutePath();
         }
         String exe;
-        exe="-y -i " +video_url+" -filter_complex [0:v]trim=0:"+startMs/1000+",setpts=PTS-STARTPTS[v1];[0:v]trim="+startMs/1000+":"+endMs/1000+",setpts=2*(PTS-STARTPTS)[v2];[0:v]trim="+(endMs/1000)+",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:"+(startMs/1000)+",asetpts=PTS-STARTPTS[a1];[0:a]atrim="+(startMs/1000)+":"+(endMs/1000)+",asetpts=PTS-STARTPTS,atempo=0.5[a2];[0:a]atrim="+(endMs/1000)+",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 "+"-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast "+filePath;
+        exe = "-y -i " + video_url + " -filter_complex [0:v]trim=0:" + startMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",setpts=2*(PTS-STARTPTS)[v2];[0:v]trim=" + (endMs / 1000) + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + (startMs / 1000) + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + (startMs / 1000) + ":" + (endMs / 1000) + ",asetpts=PTS-STARTPTS,atempo=0.5[a2];[0:a]atrim=" + (endMs / 1000) + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath;
 
         long executionId = FFmpeg.executeAsync(exe, new ExecuteCallback() {
 
@@ -316,9 +316,9 @@ public class MainActivity extends AppCompatActivity {
                     progressDialog.dismiss();
 
                 } else if (returnCode == RETURN_CODE_CANCEL) {
-                    Log.i(Config.TAG, "Async command execution cancelled by user.");
+                    Log.i(TAG, "Async command execution cancelled by user.");
                 } else {
-                    Log.i(Config.TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
+                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
                 }
             }
         });
@@ -341,16 +341,16 @@ public class MainActivity extends AppCompatActivity {
 
             ContentValues valuesvideos = new ContentValues();
             valuesvideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
-            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix+System.currentTimeMillis());
-            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix+System.currentTimeMillis()+fileExtn);
+            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
+            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
             valuesvideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
             valuesvideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
             valuesvideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
             Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesvideos);
-            File file=FileUtils.getFileFromUri(this,uri);
-            filePath=file.getAbsolutePath();
+            File file = FileUtils.getFileFromUri(this, uri);
+            filePath = file.getAbsolutePath();
 
-        }else{
+        } else {
             filePrefix = "reverse";
             fileExtn = ".mp4";
             File dest = new File(new File(app_folder), filePrefix + fileExtn);
@@ -372,9 +372,9 @@ public class MainActivity extends AppCompatActivity {
                     videoView.start();
                     progressDialog.dismiss();
                 } else if (returnCode == RETURN_CODE_CANCEL) {
-                    Log.i(Config.TAG, "Async command execution cancelled by user.");
+                    Log.i(TAG, "Async command execution cancelled by user.");
                 } else {
-                    Log.i(Config.TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
+                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
                 }
             }
         });
@@ -402,7 +402,7 @@ public class MainActivity extends AppCompatActivity {
                         videoView.start();
                         //get the absolute path of the video file. We will require this as an input argument in
                         //the ffmpeg command.
-                        video_url=filemanagerstring;
+                        video_url = filemanagerstring;
                     } catch (Exception e) {
                         Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
                         e.printStackTrace();
