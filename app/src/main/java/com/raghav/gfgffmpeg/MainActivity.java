@@ -193,6 +193,7 @@ public class MainActivity extends AppCompatActivity {
 		 */
 
         //create a progress dialog and show it until this method executes.
+        progressDialog.setMessage("Convert FastForward...");
         progressDialog.show();
 
         //creating a new file in storage
@@ -273,6 +274,7 @@ public class MainActivity extends AppCompatActivity {
      */
     private void slowMotion(int startMs, int endMs) throws Exception {
 
+        progressDialog.setMessage("Convert slow motion...");
         progressDialog.show();
 
         final String filePath;
@@ -332,6 +334,7 @@ public class MainActivity extends AppCompatActivity {
 */
     private void reverse(int startMs, int endMs) throws Exception {
 
+        progressDialog.setMessage("Convert reverse...");
         progressDialog.show();
         String filePrefix = "reverse";
         String fileExtn = ".mp4";
