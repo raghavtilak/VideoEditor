@@ -4,7 +4,6 @@ import android.annotation.SuppressLint
 import com.raghav.gfgffmpeg.FileUtils.getFileFromUri
 import androidx.appcompat.app.AppCompatActivity
 import android.app.ProgressDialog
-import org.florescu.android.rangeseekbar.RangeSeekBar
 import android.content.Intent
 import android.content.ContentValues
 import android.provider.MediaStore
@@ -14,36 +13,24 @@ import android.net.Uri
 import android.os.*
 import android.util.Log
 import android.widget.*
+import com.raghav.gfgffmpeg.databinding.ActivityMainBinding
 import java.io.File
 import java.lang.Exception
 
 class MainActivity : AppCompatActivity() {
 
-    private lateinit var reverse: ImageButton
-    private lateinit var slow: ImageButton
-    private lateinit var fast: ImageButton
-    private lateinit var selectVideo: Button
-    private lateinit var tvLeft: TextView
-    private lateinit var tvRight: TextView
     private lateinit var progressDialog: ProgressDialog
     private var videoUrl: String? = null
-    private lateinit var videoView: VideoView
     private var runnable: Runnable? = null
-    private lateinit var rangeSeekBar: RangeSeekBar<Int>
+
+    private lateinit var binding: ActivityMainBinding
 
     @SuppressLint("SetTextI18n")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        setContentView(R.layout.activity_main)
-        rangeSeekBar = findViewById(R.id.rangeSeekBar)
-        tvLeft = findViewById(R.id.textleft)
-        tvRight = findViewById(R.id.textright)
-        slow = findViewById(R.id.slow)
-        reverse = findViewById(R.id.reverse)
-        fast = findViewById(R.id.fast)
-        selectVideo = findViewById(R.id.selectVideo)
-        fast = findViewById(R.id.fast)
-        videoView = findViewById(R.id.layout_movie_wrapper)
+        binding = ActivityMainBinding.inflate(layoutInflater)
+        val view = binding.root
+        setContentView(view)
 
         //creating the progress dialog
         progressDialog = ProgressDialog(this@MainActivity)
@@ -51,12 +38,12 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.setCanceledOnTouchOutside(false)
 
-        selectVideo.setOnClickListener { //create an intent to retrieve the video file from the device storage
+        binding.selectVideo.setOnClickListener { //create an intent to retrieve the video file from the device storage
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "video/*"
             startActivityForResult(Intent.createChooser(intent, "Select Video"), REQUEST_TAKE_GALLERY_VIDEO)
         }
-        slow.setOnClickListener {
+        binding.slow.setOnClickListener {
 
             //check if the user has selected any video or not
             //In case a user hasn't selected any video and press the button,
@@ -64,27 +51,27 @@ class MainActivity : AppCompatActivity() {
             if (videoUrl != null) {
                 //a try-catch block to handle all necessary exceptions like File not found, IOException
                 try {
-                    slowMotion(rangeSeekBar.selectedMinValue.toInt() * 1000, rangeSeekBar.selectedMaxValue.toInt() * 1000)
+                    slowMotion(binding.rangeSeekBar.selectedMinValue.toInt() * 1000, binding.rangeSeekBar.selectedMaxValue.toInt() * 1000)
                 } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
                     e.printStackTrace()
                 }
             } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG).show()
         }
-        fast.setOnClickListener {
+        binding.fast.setOnClickListener {
             if (videoUrl != null) {
                 try {
-                    fastForward(rangeSeekBar.selectedMinValue.toInt() * 1000, rangeSeekBar.selectedMaxValue.toInt() * 1000)
+                    fastForward(binding.rangeSeekBar.selectedMinValue.toInt() * 1000, binding.rangeSeekBar.selectedMaxValue.toInt() * 1000)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
                 }
             } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG).show()
         }
-        reverse.setOnClickListener {
+        binding.reverse.setOnClickListener {
             if (videoUrl != null) {
                 try {
-                    reverse(rangeSeekBar.selectedMinValue.toInt() * 1000, rangeSeekBar.selectedMaxValue.toInt() * 1000)
+                    reverse(binding.rangeSeekBar.selectedMinValue.toInt() * 1000, binding.rangeSeekBar.selectedMaxValue.toInt() * 1000)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
@@ -96,35 +83,35 @@ class MainActivity : AppCompatActivity() {
             set up the VideoView.
             We will be using VideoView to view our video.
          */
-        videoView.setOnPreparedListener { mp -> //get the duration of the video
+        binding.videoView.setOnPreparedListener { mp -> //get the duration of the video
             val duration = mp.duration / 1000
             //initially set the left TextView to "00:00:00"
-            tvLeft.text = "00:00:00"
+            binding.textleft.text = "00:00:00"
             //initially set the right Text-View to the video length
             //the getTime() method returns a formatted string in hh:mm:ss
-            tvRight.text = getTime(mp.duration / 1000)
+            binding.textright.text = getTime(mp.duration / 1000)
             //this will run he ideo in loop i.e. the video won't stop
             //when it reaches its duration
             mp.isLooping = true
 
             //set up the initial values of rangeSeekbar
-            rangeSeekBar.setRangeValues(0, duration)
-            rangeSeekBar.selectedMinValue = 0
-            rangeSeekBar.selectedMaxValue = duration
-            rangeSeekBar.isEnabled = true
-            rangeSeekBar.setOnRangeSeekBarChangeListener { bar, minValue, maxValue -> //we seek through the video when the user drags and adjusts the seekbar
-                videoView.seekTo(minValue as Int * 1000)
+            binding.rangeSeekBar.setRangeValues(0, duration)
+            binding.rangeSeekBar.selectedMinValue = 0
+            binding.rangeSeekBar.selectedMaxValue = duration
+            binding.rangeSeekBar.isEnabled = true
+            binding.rangeSeekBar.setOnRangeSeekBarChangeListener { bar, minValue, maxValue -> //we seek through the video when the user drags and adjusts the seekbar
+                binding.videoView.seekTo(minValue as Int * 1000)
                 //changing the left and right TextView according to the minValue and maxValue
-                tvLeft.text = getTime(bar.selectedMinValue as Int)
-                tvRight.text = getTime(bar.selectedMaxValue as Int)
+                binding.textleft.text = getTime(bar.selectedMinValue as Int)
+                binding.textright.text = getTime(bar.selectedMaxValue as Int)
             }
 
             //this method changes the right TextView every 1 second as the video is being played
             //It works same as a time counter we see in any Video Player
             val handler = Handler(Looper.getMainLooper())
             handler.postDelayed(Runnable {
-                if (videoView.currentPosition >= rangeSeekBar.selectedMaxValue.toInt() * 1000)
-                    videoView.seekTo(rangeSeekBar.selectedMinValue.toInt() * 1000)
+                if (binding.videoView.currentPosition >= binding.rangeSeekBar.selectedMaxValue.toInt() * 1000)
+                    binding.videoView.seekTo(binding.rangeSeekBar.selectedMinValue.toInt() * 1000)
                 handler.postDelayed(runnable!!, 1000)
             }.also { runnable = it }, 1000)
         }
@@ -162,14 +149,14 @@ class MainActivity : AppCompatActivity() {
                 session.returnCode.isSuccess -> {
                     //after successful execution of ffmpeg command,
                     //again set up the video Uri in VideoView
-                    videoView.setVideoURI(Uri.parse(filePath))
+                    binding.videoView.setVideoURI(Uri.parse(filePath))
                     //change the video_url to filePath, so that we could do more manipulations in the
                     //resultant video. By this we can apply as many effects as we want in a single video.
                     //Actually there are multiple videos being formed in storage but while using app it
                     //feels like we are doing manipulations in only one video
                     videoUrl = filePath
                     //play the result video in VideoView
-                    videoView.start()
+                    binding.videoView.start()
                 }
                 session.returnCode.isCancel -> Log.i(TAG, "Async command execution cancelled by user.")
                 else -> Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", session.returnCode))
@@ -194,9 +181,9 @@ class MainActivity : AppCompatActivity() {
         FFmpegKit.executeAsync(exe) { session ->
             when {
                 session.returnCode.isSuccess -> {
-                    videoView.setVideoURI(Uri.parse(filePath))
+                    binding.videoView.setVideoURI(Uri.parse(filePath))
                     videoUrl = filePath
-                    videoView.start()
+                    binding.videoView.start()
                 }
                 session.returnCode.isCancel -> Log.i(TAG, "Execution cancelled by user.")
                 else -> Log.e(TAG, String.format("Execution failed returnCode=%d i=%s %s", session.returnCode, videoUrl, filePath))
@@ -220,9 +207,9 @@ class MainActivity : AppCompatActivity() {
         FFmpegKit.executeAsync("-y -i " + videoUrl + " -filter_complex [0:v]trim=0:" + endMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",reverse,setpts=PTS-STARTPTS[v2];[0:v]trim=" + startMs / 1000 + ",setpts=PTS-STARTPTS[v3];[v1][v2][v3]concat=n=3:v=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath) { session ->
             when {
                 session.returnCode.isSuccess -> {
-                    videoView.setVideoURI(Uri.parse(filePath))
+                    binding.videoView.setVideoURI(Uri.parse(filePath))
                     videoUrl = filePath
-                    videoView.start()
+                    binding.videoView.start()
                 }
                 session.returnCode.isCancel -> Log.i(TAG, "Async command execution cancelled by user.")
                 else -> Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", session.returnCode))
@@ -243,10 +230,10 @@ class MainActivity : AppCompatActivity() {
                         val filemanagerstring = uri!!.path
                         //get the file from the Uri using getFileFromUri() methid present in FileUils.java
                         //now set the video uri in the VideoView
-                        videoView.setVideoURI(uri)
+                        binding.videoView.setVideoURI(uri)
                         //after successful retrieval of the video and properly setting up the retried video uri in
                         //VideoView, Start the VideoView to play that video
-                        videoView.start()
+                        binding.videoView.start()
                         //get the absolute path of the video file. We will require this as an input argument in
                         //the ffmpeg command.
                         videoUrl = filemanagerstring
