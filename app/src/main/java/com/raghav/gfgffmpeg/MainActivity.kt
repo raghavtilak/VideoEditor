@@ -38,6 +38,8 @@ class MainActivity : AppCompatActivity() {
         progressDialog.setCancelable(false)
         progressDialog.setCanceledOnTouchOutside(false)
 
+        binding.version.text = Build.SUPPORTED_ABIS.toList().toString()
+
         binding.selectVideo.setOnClickListener { //create an intent to retrieve the video file from the device storage
             val intent = Intent(Intent.ACTION_GET_CONTENT)
             intent.type = "video/*"
