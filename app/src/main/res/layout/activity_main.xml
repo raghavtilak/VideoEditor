@@ -16,9 +16,9 @@
 
         <Button
             android:id="@+id/selectVideo"
-            android:layout_alignParentStart="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
+            android:layout_alignParentStart="true"
             android:layout_centerInParent="true"
             android:background="@color/transparent"
             android:text="Select Video"
@@ -26,11 +26,11 @@
 
         <TextView
             android:id="@+id/version"
-            android:layout_alignParentEnd="true"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            tools:text="abi"
-            tools:ignore="RelativeOverlap" />
+            android:layout_alignParentEnd="true"
+            tools:ignore="RelativeOverlap"
+            tools:text="abi" />
 
     </RelativeLayout>
 
