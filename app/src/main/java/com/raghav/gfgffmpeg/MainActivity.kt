@@ -1,7 +1,6 @@
 package com.raghav.gfgffmpeg
 
 import android.annotation.SuppressLint
-import com.raghav.gfgffmpeg.FileUtils.getFileFromUri
 import androidx.appcompat.app.AppCompatActivity
 import android.app.ProgressDialog
 import android.content.Intent
@@ -12,6 +11,7 @@ import kotlin.Throws
 import android.net.Uri
 import android.os.*
 import android.widget.*
+import com.google.android.material.snackbar.Snackbar
 import com.raghav.gfgffmpeg.databinding.ActivityMainBinding
 import timber.log.Timber
 import java.io.File
@@ -91,7 +91,7 @@ class MainActivity : AppCompatActivity() {
             binding.textleft.text = "00:00:00"
             //initially set the right Text-View to the video length
             //the getTime() method returns a formatted string in hh:mm:ss
-            binding.textright.text = getTime(mp.duration / 1000)
+            binding.textright.text = (mp.duration / 1000).getTime()
             //this will run he ideo in loop i.e. the video won't stop
             //when it reaches its duration
             mp.isLooping = true
@@ -104,8 +104,8 @@ class MainActivity : AppCompatActivity() {
             binding.rangeSeekBar.setOnRangeSeekBarChangeListener { bar, minValue, maxValue -> //we seek through the video when the user drags and adjusts the seekbar
                 binding.videoView.seekTo(minValue as Int * 1000)
                 //changing the left and right TextView according to the minValue and maxValue
-                binding.textleft.text = getTime(bar.selectedMinValue as Int)
-                binding.textright.text = getTime(bar.selectedMaxValue as Int)
+                binding.textleft.text = (bar.selectedMinValue as Int).getTime()
+                binding.textright.text = (bar.selectedMaxValue as Int).getTime()
             }
 
             //this method changes the right TextView every 1 second as the video is being played
@@ -119,18 +119,12 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    /**
-     * Method for creating fast motion video
-     */
+    /* startMs is the starting time, from where we have to apply the effect.
+       endMs is the ending time, till where we have to apply effect.
+       For example, we have a video of 5min and we only want to fast forward a part of video
+       say, from 1:00 min to 2:00min, then our startMs will be 1000ms and endMs will be 2000ms.
+    */
     private fun fastForward(startMs: Int, endMs: Int) {
-        /* startMs is the starting time, from where we have to apply the effect.
-  	         endMs is the ending time, till where we have to apply effect.
-   	         For example, we have a video of 5min and we only want to fast forward a part of video
-  	         say, from 1:00 min to 2:00min, then our startMs will be 1000ms and endMs will be 2000ms.
-		 */
-
-        //create a progress dialog and show it until this method executes.
-        progressDialog.setMessage("Convert FastForward...")
         progressDialog.show()
 
         //creating a new file in storage
@@ -138,34 +132,10 @@ class MainActivity : AppCompatActivity() {
 
         //the "exe" string contains the command to process video.The details of command are discussed later in this post.
         // "video_url" is the url of video which you want to edit. You can get this url from intent by selecting any video from gallery.
-        val exe: String =
-            "-y -i " + videoUrl + " -filter_complex [0:v]trim=0:" + startMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",setpts=0.5*(PTS-STARTPTS)[v2];[0:v]trim=" + endMs / 1000 + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + startMs / 1000 + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + startMs / 1000 + ":" + endMs / 1000 + ",asetpts=PTS-STARTPTS,atempo=2[a2];[0:a]atrim=" + endMs / 1000 + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath
-
-        /*
-            Here, we have used he Async task to execute our query because if we use the regular method the progress dialog
-            won't be visible. This happens because the regular method and progress dialog uses the same thread to execute
-            and as a result only one is a allowed to work at a time.
-            By using we Async task we create a different thread which resolves the issue.
-         */FFmpegKit.executeAsync(exe) { session ->
-            when {
-                session.returnCode.isSuccess -> {
-                    //after successful execution of ffmpeg command,
-                    //again set up the video Uri in VideoView
-                    binding.videoView.setVideoURI(Uri.parse(filePath))
-                    //change the video_url to filePath, so that we could do more manipulations in the
-                    //resultant video. By this we can apply as many effects as we want in a single video.
-                    //Actually there are multiple videos being formed in storage but while using app it
-                    //feels like we are doing manipulations in only one video
-                    videoUrl = filePath
-                    //play the result video in VideoView
-                    binding.videoView.start()
-                }
-                session.returnCode.isCancel -> Timber.i("Async command execution cancelled by user.")
-                else -> Timber.i("Async command execution failed with returnCode=${session.returnCode}")
-
-            }
-            progressDialog.dismiss()
-        }
+        val exe: String = "-y -i ${Uri.parse(videoUrl)} " +
+                "-filter_complex [0:v]trim=0:${startMs / 1000},setpts=PTS-STARTPTS[v1];[0:v]trim=${startMs / 1000},:${endMs / 1000},,setpts=0.5*(PTS-STARTPTS)[v2];[0:v]trim=" + endMs / 1000 + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + startMs / 1000 + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + startMs / 1000 + ":" + endMs / 1000 + ",asetpts=PTS-STARTPTS,atempo=2[a2];[0:a]atrim=" + endMs / 1000 + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " +
+                "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast $filePath"
+        proceed(exe, "FastForward")
     }
 
     /**
@@ -174,61 +144,24 @@ class MainActivity : AppCompatActivity() {
      */
     @Throws(Exception::class)
     private fun slowMotion(startMs: Int, endMs: Int) {
-        progressDialog.setMessage("Convert slow motion...")
         progressDialog.show()
         val filePath = getFilePath("slowmotion")
 
-        val exe: String =
-            "-y -i " + videoUrl?.replace(
-                "/document/raw:",
-                ""
-            ) + " -filter_complex [0:v]trim=0:" + startMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",setpts=2*(PTS-STARTPTS)[v2];[0:v]trim=" + endMs / 1000 + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + startMs / 1000 + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + startMs / 1000 + ":" + endMs / 1000 + ",asetpts=PTS-STARTPTS,atempo=0.5[a2];[0:a]atrim=" + endMs / 1000 + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath
+        val exe: String = "-y -i ${Uri.parse(videoUrl)} " +
+                "-filter_complex [0:v]trim=0:${startMs / 1000},setpts=PTS-STARTPTS[v1];[0:v]trim=${startMs / 1000}:${endMs / 1000},setpts=2*(PTS-STARTPTS)[v2];[0:v]trim=${endMs / 1000},setpts=PTS-STARTPTS[v3];[0:a]atrim=0:${startMs / 1000},asetpts=PTS-STARTPTS[a1];[0:a]atrim=${startMs / 1000}:${endMs / 1000},asetpts=PTS-STARTPTS,atempo=0.5[a2];[0:a]atrim=${endMs / 1000},asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " +
+                "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast $filePath"
 
-        FFmpegKit.executeAsync(exe, { session ->
-            when {
-                session.returnCode.isSuccess -> {
-                    binding.videoView.setVideoURI(Uri.parse(filePath))
-                    videoUrl = filePath
-                    binding.videoView.start()
-                }
-                session.returnCode.isError -> Timber.e("Execution error: ${exe.replace(" -", "\n -")}")
-                session.returnCode.isCancel -> Timber.i("Execution cancelled by user.")
-                else -> Timber.e("Execution failed returnCode=${session.returnCode} i=$videoUrl $filePath")
-            }
-            progressDialog.dismiss()
-        }, {
-            progressDialog.setMessage("Convert slow motion...\n${it.level.name.replace("AV_LOG_", "")} ${it.message}")
-            Timber.d("${it.level} ${it.message}")
-        }, {
-            progressDialog.setMessage("Convert slow motion...\n${it}")
-            Timber.v(it.toString())
-        })
+        proceed(exe, "SlowMotion")
     }
 
-    /**
-     * Method for reversing the video
-     */
-    /*
-	The below code is same as above only the command is changed.
-*/
     @Throws(Exception::class)
     private fun reverse(startMs: Int, endMs: Int) {
-        progressDialog.setMessage("Convert reverse...")
         progressDialog.show()
         val filePath = getFilePath("reverse")
 
-        FFmpegKit.executeAsync("-y -i " + videoUrl + " -filter_complex [0:v]trim=0:" + endMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",reverse,setpts=PTS-STARTPTS[v2];[0:v]trim=" + startMs / 1000 + ",setpts=PTS-STARTPTS[v3];[v1][v2][v3]concat=n=3:v=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath) { session ->
-            when {
-                session.returnCode.isSuccess -> {
-                    binding.videoView.setVideoURI(Uri.parse(filePath))
-                    videoUrl = filePath
-                    binding.videoView.start()
-                }
-                session.returnCode.isCancel -> Timber.i("Async command execution cancelled by user.")
-                else -> Timber.i("Async command execution failed with returnCode=${session.returnCode}")
-            }
-            progressDialog.dismiss()
-        }
+        val exe = "-y -i ${Uri.parse(videoUrl)} " +
+                "-filter_complex [0:v]trim=0:" + endMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",reverse,setpts=PTS-STARTPTS[v2];[0:v]trim=" + startMs / 1000 + ",setpts=PTS-STARTPTS[v3];[v1][v2][v3]concat=n=3:v=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath
+        proceed(exe, "Reverse")
     }
 
     //Overriding the method onActivityResult() to get the video Uri form intent.
@@ -240,7 +173,6 @@ class MainActivity : AppCompatActivity() {
                     //get the video Uri
                     val uri = data.data
                     try {
-                        val filemanagerstring = uri!!.path
                         //get the file from the Uri using getFileFromUri() methid present in FileUils.java
                         //now set the video uri in the VideoView
                         binding.videoView.setVideoURI(uri)
@@ -249,7 +181,7 @@ class MainActivity : AppCompatActivity() {
                         binding.videoView.start()
                         //get the absolute path of the video file. We will require this as an input argument in
                         //the ffmpeg command.
-                        videoUrl = filemanagerstring
+                        videoUrl = FileManager.getPath(this, uri!!)
                     } catch (e: Exception) {
                         Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
                         Timber.e(e)
@@ -259,17 +191,8 @@ class MainActivity : AppCompatActivity() {
         }
     }
 
-    //This method returns the seconds in hh:mm:ss time format
-    private fun getTime(seconds: Int): String {
-        val hr = seconds / 3600
-        val rem = seconds % 3600
-        val mn = rem / 60
-        val sec = rem % 60
-        return String.format("%02d", hr) + ":" + String.format("%02d", mn) + ":" + String.format("%02d", sec)
-    }
-
     private fun getFilePath(filePrefix: String): String {
-        var filePath = ""
+        val filePath: String
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val valuesVideos = ContentValues()
             valuesVideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder")
@@ -280,8 +203,7 @@ class MainActivity : AppCompatActivity() {
             valuesVideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis())
             val uri = contentResolver.insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesVideos)
 
-            val file = getFileFromUri(this, uri!!)
-            filePath = file.absolutePath
+            filePath = FileManager.getPath(this, uri!!)!!
         } else {
             var dest = File(File(app_folder), filePrefix + MP4_EXTENSION)
             var fileNo = 0
@@ -292,6 +214,55 @@ class MainActivity : AppCompatActivity() {
             filePath = dest.absolutePath
         }
         return filePath
+    }
+
+    private fun proceed(exe: String, caption: String) {
+        FFmpegKit.executeAsync(exe, { session ->
+            when {
+                session.returnCode.isSuccess -> {
+                    progressDialog.dismiss()
+                    videoUrl = session.arguments.last()
+                    Timber.d("$videoUrl fileSize=${File(videoUrl).length()}")
+                    binding.videoView.apply {
+                        stopPlayback()
+                        setVideoURI(Uri.parse(session.arguments.last()))
+                        start()
+                    }
+                }
+                session.returnCode.isError -> {
+                    val text = exe.replace(" -", "\n -")
+                    Timber.e("Execution error: $text")
+                    val snackBar = Snackbar.make(
+                        findViewById(android.R.id.content),
+                        text.take(100),
+                        Snackbar.LENGTH_LONG
+                    )
+                    snackBar.show()
+                }
+                session.returnCode.isCancel -> Timber.i("Execution cancelled by user.")
+                else -> Timber.e("Execution failed returnCode=${session.returnCode} i=$videoUrl ${session.arguments.last()}")
+            }
+            progressDialog.dismiss()
+        }, {
+            if (it.level.name.startsWith("AV_LOG_ERROR")) {
+                Timber.e("${it.level} ${it.message}")
+                val snackBar = Snackbar.make(
+                    findViewById(android.R.id.content),
+                    it.message,
+                    Snackbar.LENGTH_INDEFINITE
+                )
+                snackBar.setAction(android.R.string.ok) {
+                    snackBar.dismiss()
+                }
+                snackBar.show()
+            } else
+                Timber.d("${it.level} ${it.message}")
+        }, {
+            Handler(Looper.getMainLooper()).post {
+                progressDialog.setMessage("$caption ... #${it.videoFrameNumber} ${it.size.humanReadableByteCountSI()}")
+            }
+            Timber.v(it.toString())
+        })
     }
 
     companion object {
