@@ -11,9 +11,9 @@ import com.arthenica.ffmpegkit.FFmpegKit
 import kotlin.Throws
 import android.net.Uri
 import android.os.*
-import android.util.Log
 import android.widget.*
 import com.raghav.gfgffmpeg.databinding.ActivityMainBinding
+import timber.log.Timber
 import java.io.File
 import java.lang.Exception
 
@@ -56,7 +56,7 @@ class MainActivity : AppCompatActivity() {
                     slowMotion(binding.rangeSeekBar.selectedMinValue.toInt() * 1000, binding.rangeSeekBar.selectedMaxValue.toInt() * 1000)
                 } catch (e: Exception) {
                     Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
-                    e.printStackTrace()
+                    Timber.e(e)
                 }
             } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG).show()
         }
@@ -65,7 +65,7 @@ class MainActivity : AppCompatActivity() {
                 try {
                     fastForward(binding.rangeSeekBar.selectedMinValue.toInt() * 1000, binding.rangeSeekBar.selectedMaxValue.toInt() * 1000)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Timber.e(e)
                     Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
                 }
             } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG).show()
@@ -75,7 +75,7 @@ class MainActivity : AppCompatActivity() {
                 try {
                     reverse(binding.rangeSeekBar.selectedMinValue.toInt() * 1000, binding.rangeSeekBar.selectedMaxValue.toInt() * 1000)
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    Timber.e(e)
                     Toast.makeText(this@MainActivity, e.toString(), Toast.LENGTH_LONG).show()
                 }
             } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG).show()
@@ -160,8 +160,8 @@ class MainActivity : AppCompatActivity() {
                     //play the result video in VideoView
                     binding.videoView.start()
                 }
-                session.returnCode.isCancel -> Log.i(TAG, "Async command execution cancelled by user.")
-                else -> Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", session.returnCode))
+                session.returnCode.isCancel -> Timber.i("Async command execution cancelled by user.")
+                else -> Timber.i("Async command execution failed with returnCode=${session.returnCode}")
 
             }
             progressDialog.dismiss()
@@ -179,19 +179,30 @@ class MainActivity : AppCompatActivity() {
         val filePath = getFilePath("slowmotion")
 
         val exe: String =
-            "-y -i " + videoUrl + " -filter_complex [0:v]trim=0:" + startMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",setpts=2*(PTS-STARTPTS)[v2];[0:v]trim=" + endMs / 1000 + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + startMs / 1000 + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + startMs / 1000 + ":" + endMs / 1000 + ",asetpts=PTS-STARTPTS,atempo=0.5[a2];[0:a]atrim=" + endMs / 1000 + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath
-        FFmpegKit.executeAsync(exe) { session ->
+            "-y -i " + videoUrl?.replace(
+                "/document/raw:",
+                ""
+            ) + " -filter_complex [0:v]trim=0:" + startMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",setpts=2*(PTS-STARTPTS)[v2];[0:v]trim=" + endMs / 1000 + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + startMs / 1000 + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + startMs / 1000 + ":" + endMs / 1000 + ",asetpts=PTS-STARTPTS,atempo=0.5[a2];[0:a]atrim=" + endMs / 1000 + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath
+
+        FFmpegKit.executeAsync(exe, { session ->
             when {
                 session.returnCode.isSuccess -> {
                     binding.videoView.setVideoURI(Uri.parse(filePath))
                     videoUrl = filePath
                     binding.videoView.start()
                 }
-                session.returnCode.isCancel -> Log.i(TAG, "Execution cancelled by user.")
-                else -> Log.e(TAG, String.format("Execution failed returnCode=%d i=%s %s", session.returnCode, videoUrl, filePath))
+                session.returnCode.isError -> Timber.e("Execution error: ${exe.replace(" -", "\n -")}")
+                session.returnCode.isCancel -> Timber.i("Execution cancelled by user.")
+                else -> Timber.e("Execution failed returnCode=${session.returnCode} i=$videoUrl $filePath")
             }
             progressDialog.dismiss()
-        }
+        }, {
+            progressDialog.setMessage("Convert slow motion...\n${it.level.name.replace("AV_LOG_", "")} ${it.message}")
+            Timber.d("${it.level} ${it.message}")
+        }, {
+            progressDialog.setMessage("Convert slow motion...\n${it}")
+            Timber.v(it.toString())
+        })
     }
 
     /**
@@ -213,8 +224,8 @@ class MainActivity : AppCompatActivity() {
                     videoUrl = filePath
                     binding.videoView.start()
                 }
-                session.returnCode.isCancel -> Log.i(TAG, "Async command execution cancelled by user.")
-                else -> Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", session.returnCode))
+                session.returnCode.isCancel -> Timber.i("Async command execution cancelled by user.")
+                else -> Timber.i("Async command execution failed with returnCode=${session.returnCode}")
             }
             progressDialog.dismiss()
         }
@@ -241,7 +252,7 @@ class MainActivity : AppCompatActivity() {
                         videoUrl = filemanagerstring
                     } catch (e: Exception) {
                         Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show()
-                        e.printStackTrace()
+                        Timber.e(e)
                     }
                 }
             }
@@ -286,7 +297,6 @@ class MainActivity : AppCompatActivity() {
     companion object {
         private val root = Environment.getExternalStorageDirectory().toString()
         private val app_folder = "$root/GFG/"
-        private val TAG = MainActivity::class.java.simpleName
         private const val REQUEST_TAKE_GALLERY_VIDEO = 123
         private const val MP4_EXTENSION = ".mp4"
     }
