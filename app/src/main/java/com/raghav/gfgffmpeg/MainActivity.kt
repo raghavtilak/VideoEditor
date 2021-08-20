@@ -195,7 +195,7 @@ class MainActivity : AppCompatActivity() {
         val filePath: String
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
             val valuesVideos = ContentValues()
-            valuesVideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder")
+            valuesVideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "ffmpeg")
             valuesVideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis())
             valuesVideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + MP4_EXTENSION)
             valuesVideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4")
