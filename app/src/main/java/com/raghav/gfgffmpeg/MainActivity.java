@@ -204,14 +204,14 @@ public class MainActivity extends AppCompatActivity {
             With introduction of scoped storage in Android Q the primitive method gives error
             So, it is recommended to use the below method to create a video file in storage.
              */
-            ContentValues valuesVideos = new ContentValues();
-            valuesVideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
-            valuesVideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
-            valuesVideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
-            valuesVideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
-            valuesVideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
-            valuesVideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
-            Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesVideos);
+            ContentValues valuesvideos = new ContentValues();
+            valuesvideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
+            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
+            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
+            valuesvideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+            valuesvideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
+            valuesvideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
+            Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesvideos);
 
             //get the path of the video file created in the storage.
             File file = FileUtils.getFileFromUri(this, uri);
@@ -339,14 +339,14 @@ public class MainActivity extends AppCompatActivity {
         final String filePath;
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q) {
 
-            ContentValues valuesVideos = new ContentValues();
-            valuesVideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
-            valuesVideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
-            valuesVideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
-            valuesVideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
-            valuesVideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
-            valuesVideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
-            Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesVideos);
+            ContentValues valuesvideos = new ContentValues();
+            valuesvideos.put(MediaStore.Video.Media.RELATIVE_PATH, "Movies/" + "Folder");
+            valuesvideos.put(MediaStore.Video.Media.TITLE, filePrefix + System.currentTimeMillis());
+            valuesvideos.put(MediaStore.Video.Media.DISPLAY_NAME, filePrefix + System.currentTimeMillis() + fileExtn);
+            valuesvideos.put(MediaStore.Video.Media.MIME_TYPE, "video/mp4");
+            valuesvideos.put(MediaStore.Video.Media.DATE_ADDED, System.currentTimeMillis() / 1000);
+            valuesvideos.put(MediaStore.Video.Media.DATE_TAKEN, System.currentTimeMillis());
+            Uri uri = getContentResolver().insert(MediaStore.Video.Media.EXTERNAL_CONTENT_URI, valuesvideos);
             File file = FileUtils.getFileFromUri(this, uri);
             filePath = file.getAbsolutePath();
 
