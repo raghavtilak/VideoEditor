@@ -32,9 +32,8 @@ import static com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS;
 
 public class MainActivity extends AppCompatActivity {
 
-    private final int REQUEST_TAKE_GALLERY_VIDEO = 123;
     private ImageButton reverse,slow,fast;
-    private Button selectVideo;
+    private Button cancel;
     private TextView tvLeft,tvRight;
     private ProgressDialog progressDialog;
     private String video_url;
@@ -49,15 +48,15 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        rangeSeekBar = findViewById(R.id.rangeSeekBar);
-        tvLeft = findViewById(R.id.textleft);
-        tvRight = findViewById(R.id.textright);
-        slow = findViewById(R.id.slow);
-        reverse = findViewById(R.id.reverse);
-        fast = findViewById(R.id.fast);
-        selectVideo = findViewById(R.id.selectVideo);
-        fast = findViewById(R.id.fast);
-        videoView = findViewById(R.id.layout_movie_wrapper);
+        rangeSeekBar = (RangeSeekBar) findViewById(R.id.rangeSeekBar);
+        tvLeft = (TextView) findViewById(R.id.textleft);
+        tvRight = (TextView) findViewById(R.id.textright);
+        slow = (ImageButton) findViewById(R.id.slow);
+        reverse = (ImageButton) findViewById(R.id.reverse);
+        fast = (ImageButton) findViewById(R.id.fast);
+        cancel = (Button) findViewById(R.id.cancel_button);
+        fast = (ImageButton) findViewById(R.id.fast);
+        videoView=(VideoView) findViewById(R.id.layout_movie_wrapper);
 
         //creating the progress dialog
         progressDialog = new ProgressDialog(MainActivity.this);
@@ -66,13 +65,15 @@ public class MainActivity extends AppCompatActivity {
         progressDialog.setCanceledOnTouchOutside(false);
 
         //set up the onClickListeners
-        selectVideo.setOnClickListener(new View.OnClickListener() {
+        cancel.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
                 //create an intent to retrieve the video file from the device storage
-                Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+                Intent intent = new Intent(
+                        Intent.ACTION_PICK,
+                        android.provider.MediaStore.Video.Media.EXTERNAL_CONTENT_URI);
                 intent.setType("video/*");
-                startActivityForResult(Intent.createChooser(intent, "Select Video"), REQUEST_TAKE_GALLERY_VIDEO);
+                startActivityForResult(intent, 123);
             }
         });
 
@@ -134,7 +135,7 @@ public class MainActivity extends AppCompatActivity {
 
             @Override
             public void onPrepared(MediaPlayer mp) {
-                //get the duration of the video
+                //get the durtion of the video
                 int duration = mp.getDuration() / 1000;
                 //initially set the left TextView to "00:00:00"
                 tvLeft.setText("00:00:00");
@@ -387,14 +388,14 @@ public class MainActivity extends AppCompatActivity {
 
         if (resultCode == RESULT_OK) {
 
-            if (requestCode == REQUEST_TAKE_GALLERY_VIDEO) {
+            if (requestCode == 123) {
 
                 if (data != null) {
                     //get the video Uri
                     Uri uri = data.getData();
                     try {
-                        String filemanagerstring = uri.getPath();
                         //get the file from the Uri using getFileFromUri() methid present in FileUils.java
+                        File video_file = FileUtils.getFileFromUri(this, uri);
                         //now set the video uri in the VideoView
                         videoView.setVideoURI(uri);
                         //after successful retrieval of the video and properly setting up the retried video uri in
@@ -402,9 +403,9 @@ public class MainActivity extends AppCompatActivity {
                         videoView.start();
                         //get the absolute path of the video file. We will require this as an input argument in
                         //the ffmpeg command.
-                        video_url=filemanagerstring;
+                        video_url=video_file.getAbsolutePath();
                     } catch (Exception e) {
-                        Toast.makeText(this, e.toString(), Toast.LENGTH_LONG).show();
+                        Toast.makeText(this, "Error", Toast.LENGTH_SHORT).show();
                         e.printStackTrace();
                     }
 
