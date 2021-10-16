@@ -1,5 +1,8 @@
 package com.raghav.gfgffmpeg;
 
+import static com.arthenica.mobileffmpeg.Config.RETURN_CODE_CANCEL;
+import static com.arthenica.mobileffmpeg.Config.RETURN_CODE_SUCCESS;
+
 import androidx.annotation.Nullable;
 import androidx.appcompat.app.AppCompatActivity;
 
@@ -20,10 +23,8 @@ import android.widget.ImageButton;
 import android.widget.TextView;
 import android.widget.Toast;
 import android.widget.VideoView;
-
-import com.arthenica.ffmpegkit.FFmpegKit;
-import com.arthenica.ffmpegkit.ExecuteCallback;
-import com.arthenica.ffmpegkit.Session;
+import com.arthenica.mobileffmpeg.ExecuteCallback;
+import com.arthenica.mobileffmpeg.FFmpeg;
 
 import org.florescu.android.rangeseekbar.RangeSeekBar;
 
@@ -56,8 +57,8 @@ public class MainActivity extends AppCompatActivity {
         reverse = findViewById(R.id.reverse);
         fast = findViewById(R.id.fast);
         selectVideo = findViewById(R.id.selectVideo);
-        fast =  findViewById(R.id.fast);
-        videoView =  findViewById(R.id.layout_movie_wrapper);
+        fast = findViewById(R.id.fast);
+        videoView = findViewById(R.id.layout_movie_wrapper);
 
         //creating the progress dialog
         progressDialog = new ProgressDialog(MainActivity.this);
@@ -241,11 +242,11 @@ public class MainActivity extends AppCompatActivity {
             and as a result only one is a allowed to work at a time.
             By using we Async task we create a different thread which resolves the issue.
          */
-        FFmpegKit.executeAsync(exe, new ExecuteCallback() {
+        long executionId = FFmpeg.executeAsync(exe, new ExecuteCallback() {
 
             @Override
-            public void apply(Session session) {
-                if (session.getReturnCode().isSuccess()) {
+            public void apply(final long executionId, final int returnCode) {
+                if (returnCode == RETURN_CODE_SUCCESS) {
                     //after successful execution of ffmpeg command,
                     //again set up the video Uri in VideoView
                     videoView.setVideoURI(Uri.parse(filePath));
@@ -257,10 +258,10 @@ public class MainActivity extends AppCompatActivity {
                     //play the result video in VideoView
                     videoView.start();
 
-                } else if (session.getReturnCode().isCancel()) {
+                } else if (returnCode == RETURN_CODE_CANCEL) {
                     Log.i(TAG, "Async command execution cancelled by user.");
                 } else {
-                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", session.getReturnCode()));
+                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
                 }
                 progressDialog.dismiss();
             }
@@ -305,20 +306,20 @@ public class MainActivity extends AppCompatActivity {
         String exe;
         exe = "-y -i " + video_url + " -filter_complex [0:v]trim=0:" + startMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",setpts=2*(PTS-STARTPTS)[v2];[0:v]trim=" + (endMs / 1000) + ",setpts=PTS-STARTPTS[v3];[0:a]atrim=0:" + (startMs / 1000) + ",asetpts=PTS-STARTPTS[a1];[0:a]atrim=" + (startMs / 1000) + ":" + (endMs / 1000) + ",asetpts=PTS-STARTPTS,atempo=0.5[a2];[0:a]atrim=" + (endMs / 1000) + ",asetpts=PTS-STARTPTS[a3];[v1][a1][v2][a2][v3][a3]concat=n=3:v=1:a=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath;
 
-        FFmpegKit.executeAsync(exe, new ExecuteCallback() {
+        long executionId = FFmpeg.executeAsync(exe, new ExecuteCallback() {
 
             @Override
-            public void apply(Session session) {
-                if (session.getReturnCode().isSuccess()) {
+            public void apply(final long executionId, final int returnCode) {
+                if (returnCode == RETURN_CODE_SUCCESS) {
 
                     videoView.setVideoURI(Uri.parse(filePath));
                     video_url = filePath;
                     videoView.start();
 
-                } else if (session.getReturnCode().isCancel()) {
+                } else if (returnCode == RETURN_CODE_CANCEL) {
                     Log.i(TAG, "Execution cancelled by user.");
                 } else {
-                    Log.e(TAG, String.format("Execution failed returnCode=%d i=%s %s", session.getReturnCode(), video_url, filePath));
+                    Log.e(TAG, String.format("Execution failed returnCode=%d i=%s %s", returnCode, video_url, filePath));
                 }
                 progressDialog.dismiss();
             }
@@ -364,18 +365,18 @@ public class MainActivity extends AppCompatActivity {
             filePath = dest.getAbsolutePath();
         }
 
-        FFmpegKit.executeAsync("-y -i " + video_url + " -filter_complex [0:v]trim=0:" + endMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",reverse,setpts=PTS-STARTPTS[v2];[0:v]trim=" + (startMs / 1000) + ",setpts=PTS-STARTPTS[v3];[v1][v2][v3]concat=n=3:v=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath, new ExecuteCallback() {
+        long executionId = FFmpeg.executeAsync("-y -i " + video_url + " -filter_complex [0:v]trim=0:" + endMs / 1000 + ",setpts=PTS-STARTPTS[v1];[0:v]trim=" + startMs / 1000 + ":" + endMs / 1000 + ",reverse,setpts=PTS-STARTPTS[v2];[0:v]trim=" + (startMs / 1000) + ",setpts=PTS-STARTPTS[v3];[v1][v2][v3]concat=n=3:v=1 " + "-b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast " + filePath, new ExecuteCallback() {
 
             @Override
-            public void apply(Session session) {
-                if (session.getReturnCode().isSuccess()) {
+            public void apply(final long executionId, final int returnCode) {
+                if (returnCode == RETURN_CODE_SUCCESS) {
                     videoView.setVideoURI(Uri.parse(filePath));
                     video_url = filePath;
                     videoView.start();
-                } else if (session.getReturnCode().isCancel()) {
+                } else if (returnCode == RETURN_CODE_CANCEL) {
                     Log.i(TAG, "Async command execution cancelled by user.");
                 } else {
-                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", session.getReturnCode()));
+                    Log.i(TAG, String.format("Async command execution failed with returnCode=%d.", returnCode));
                 }
                 progressDialog.dismiss();
             }
