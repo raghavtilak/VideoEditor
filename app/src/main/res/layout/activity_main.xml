@@ -2,7 +2,7 @@
 <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:background="@color/black"
+    android:background="@drawable/gradient_relative_layout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity">
@@ -10,12 +10,13 @@
 
     <Button
         android:id="@+id/selectVideo"
-        android:layout_toStartOf="@id/saveVideo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_marginEnd="5dp"
-        android:background="#29B6F6"
+        android:layout_toStartOf="@id/saveVideo"
+        android:background="@drawable/buttonradius"
+        android:padding="10dp"
         android:text="Select Video"
         android:textColor="@color/white" />
 
@@ -25,7 +26,8 @@
         android:layout_height="wrap_content"
         android:layout_alignParentTop="true"
         android:layout_alignParentEnd="true"
-        android:background="#4CAF50"
+        android:background="@drawable/button_save"
+        android:padding="10dp"
         android:text="Save"
         android:textColor="@color/white" />
 
@@ -72,13 +74,14 @@
         </RelativeLayout>
 
         <RelativeLayout
-            android:background="@color/white"
+
             android:layout_width="match_parent"
             android:layout_height="wrap_content">
 
             <org.florescu.android.rangeseekbar.RangeSeekBar
 
                 android:id="@+id/rangeSeekBar"
+                android:background="@drawable/seekbar_corner"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 app:activeColor="@color/white"
