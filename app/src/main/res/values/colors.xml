@@ -43,7 +43,11 @@
     <color name="shadow_color">#00000000</color>
 
     <color name="app_color">#c52127</color>
+    <color name="green_start">#A1F689</color>
+    <color name="green_end">#08FB00</color>
+    <color name="blue_start">#4503FD</color>
 
+    <color name="blue_end">#002AFF</color>
 
 
 
