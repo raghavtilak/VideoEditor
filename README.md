@@ -7,7 +7,7 @@ This app contains basic functionality to fast forward, slowmo and reverse either
 
 ## Tech Stack
 
-Android, Java, FFMPEG
+Android, Kotlin, FFMPEG
 
 
 ## Demo
