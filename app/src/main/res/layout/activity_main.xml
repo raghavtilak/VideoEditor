@@ -47,95 +47,11 @@
         android:layout_alignParentBottom="true"
         android:orientation="vertical">
 
-        <RelativeLayout
+        <androidx.compose.ui.platform.ComposeView
+            android:id="@+id/compose_control_panel"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="wrap_content" />
 
-            <TextView
-                android:id="@+id/textleft"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentStart="true"
-                android:layout_marginBottom="10dp"
-                android:text="00:00"
-                android:textColor="@color/white" />
-
-            <TextView
-                android:id="@+id/textright"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_alignParentEnd="true"
-                android:layout_marginBottom="10dp"
-                android:layout_weight="1"
-                android:text="00:00"
-                android:textAlignment="textEnd"
-                android:textColor="@color/white" />
-        </RelativeLayout>
-
-        <RelativeLayout
-
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <org.florescu.android.rangeseekbar.RangeSeekBar
-
-                android:id="@+id/rangeSeekBar"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:background="@drawable/seekbar_corner"
-                app:activeColor="@color/white"
-                app:alwaysActive="true"
-                app:barHeight="2dp"
-                app:showLabels="false"
-                app:textAboveThumbsColor="#000000" />
-
-        </RelativeLayout>
-
-        <LinearLayout
-            android:layout_width="match_parent"
-            android:layout_height="10dp" />
-
-        <RelativeLayout
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content">
-
-            <LinearLayout
-                android:id="@+id/lineartime"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/text"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text=""
-                    android:textColor="@color/semitransredcolornew" />
-
-                <androidx.compose.ui.platform.ComposeView
-                    android:id="@+id/compose_button_bar"
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content" />
-
-            </LinearLayout>
-
-            <LinearLayout
-                android:id="@+id/lineareffects"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:orientation="vertical">
-
-                <TextView
-                    android:id="@+id/text2"
-                    android:layout_width="wrap_content"
-                    android:layout_height="wrap_content"
-                    android:layout_marginBottom="10dp"
-                    android:text="Tap to add effects"
-                    android:textColor="@color/white" />
-            </LinearLayout>
-
-        </RelativeLayout>
     </LinearLayout>
 
 </RelativeLayout>

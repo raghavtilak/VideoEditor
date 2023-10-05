@@ -1,6 +1,5 @@
 package com.raghav.gfgffmpeg
 
-import android.content.res.Configuration
 import androidx.annotation.DrawableRes
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
@@ -29,14 +28,19 @@ fun ControlPanelButtons(
     secondClick: () -> Unit,
     thirdClick: () -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceAround
-    ) {
-        SingleToolIcon(R.drawable.icon_effect_slow, "Slow Motion") { firstClick() }
-        SingleToolIcon(R.drawable.icon_effect_time, "Reverse") { secondClick() }
-        SingleToolIcon(R.drawable.icon_effect_repeatedly, "Flash") { thirdClick() }
+    Column {
+        Text("Tap to add effects", style = TextStyle(color = Color.White, fontSize = 14.sp))
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(vertical = 10.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceAround
+        ) {
+            SingleToolIcon(R.drawable.icon_effect_slow, "Slow Motion") { firstClick() }
+            SingleToolIcon(R.drawable.icon_effect_time, "Reverse") { secondClick() }
+            SingleToolIcon(R.drawable.icon_effect_repeatedly, "Flash") { thirdClick() }
+        }
     }
 }
 

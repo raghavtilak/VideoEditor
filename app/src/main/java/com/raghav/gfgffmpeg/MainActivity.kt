@@ -8,6 +8,12 @@ import android.util.Log
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
+import androidx.compose.foundation.layout.Column
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegKitConfig
@@ -24,6 +30,11 @@ class MainActivity : AppCompatActivity() {
     private var input_video_uri: String? = null
     lateinit var binding: ActivityMainBinding
     val handler = Handler(Looper.getMainLooper())
+
+    var videoMinVal = mutableFloatStateOf(0f)
+    var videoMaxVal = mutableFloatStateOf(1f)
+    var videoSelectedLowerVal = mutableFloatStateOf(0f)
+    var videoSelectedUpperVal = mutableFloatStateOf(1f)
 
     //create an intent launcher to retrieve the video file from the device storage
     private val selectVideoLauncher =
@@ -70,36 +81,60 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        binding.composeButtonBar.setContent {
-            ControlPanelButtons(
-                firstClick = {
-                    if (input_video_uri != null) {
-                        slowMotion(
-                            binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
-                            binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
-                        )
-                    } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
-                        .show()
-                },
-                secondClick = {
-                    if (input_video_uri != null) {
-                        reverse(
-                            binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
-                            binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
-                        )
-                    } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
-                        .show()
-                },
-                thirdClick = {
-                    if (input_video_uri != null) {
-                        fastForward(
-                            binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
-                            binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
-                        )
-                    } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
-                        .show()
+        binding.composeControlPanel.setContent {
+            Column {
+                ScrubberPanel(
+                    lowerValue = videoSelectedLowerVal.floatValue,
+                    upperValue = videoSelectedUpperVal.floatValue,
+                    from = videoMinVal.floatValue,
+                    to = videoMaxVal.floatValue
+                ) { lower, upper ->
+                    videoSelectedLowerVal.floatValue = lower
+                    videoSelectedUpperVal.floatValue = upper
+                    binding.videoView.seekTo(videoSelectedLowerVal.floatValue.toInt() * 1000)
                 }
-            )
+                ControlPanelButtons(
+                    firstClick = {
+                        if (input_video_uri != null) {
+                            slowMotion(
+                                videoSelectedLowerVal.floatValue.toInt() * 1000,
+                                videoSelectedUpperVal.floatValue.toInt() * 1000
+                            )
+                        } else Toast.makeText(
+                            this@MainActivity,
+                            "Please upload video",
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                    },
+                    secondClick = {
+                        if (input_video_uri != null) {
+                            reverse(
+                                videoSelectedLowerVal.floatValue.toInt() * 1000,
+                                videoSelectedUpperVal.floatValue.toInt() * 1000
+                            )
+                        } else Toast.makeText(
+                            this@MainActivity,
+                            "Please upload video",
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                    },
+                    thirdClick = {
+                        if (input_video_uri != null) {
+                            fastForward(
+                                videoSelectedLowerVal.floatValue.toInt() * 1000,
+                                videoSelectedUpperVal.floatValue.toInt() * 1000
+                            )
+                        } else Toast.makeText(
+                            this@MainActivity,
+                            "Please upload video",
+                            Toast.LENGTH_LONG
+                        )
+                            .show()
+                    }
+                )
+            }
         }
 
         binding.saveVideo.setOnClickListener {
@@ -119,48 +154,22 @@ class MainActivity : AppCompatActivity() {
             We will be using VideoView to view our video.
          */
         binding.videoView.setOnPreparedListener { mp ->
-            //get the duration of the video
             val duration = mp.duration / 1000
-            //initially set the left TextView to "00:00:00"
-            binding.textleft.text = "00:00:00"
-            //initially set the right Text-View to the video length
-            //the getTime() method returns a formatted string in hh:mm:ss
-            binding.textright.text = getTime(mp.duration / 1000)
-            //this will run he video in loop i.e. the video won't stop
-            //when it reaches its duration
+            videoMinVal.floatValue = 0f
+            videoMaxVal.floatValue = mp.duration / 1000f
+            videoSelectedLowerVal.floatValue = 0f
+            videoSelectedUpperVal.floatValue = mp.duration / 1000f
             mp.isLooping = true
-
-            //set up the initial values of binding.rangeSeekBar
-            binding.rangeSeekBar.setRangeValues(0, duration)
-            binding.rangeSeekBar.selectedMinValue = 0
-            binding.rangeSeekBar.selectedMaxValue = duration
-            binding.rangeSeekBar.isEnabled = true
-            binding.rangeSeekBar.setOnRangeSeekBarChangeListener { bar, minValue, maxValue ->
-                //we seek through the video when the user drags and adjusts the seekbar
-                binding.videoView.seekTo(minValue as Int * 1000)
-                //changing the left and right TextView according to the minValue and maxValue
-                binding.textleft.text = getTime(bar.selectedMinValue.toInt())
-                binding.textright.text = getTime(bar.selectedMaxValue.toInt())
-            }
-
-            //this method changes the right TextView every 1 second as the video is being played
-            //It works same as a time counter we see in any Video Player
-
             handler.postDelayed(object : Runnable {
                 override fun run() {
-
                     val time: Int = abs(duration - binding.videoView.currentPosition) / 1000
-                    binding.textleft.text = getTime(time)
 
-                    //wrapping the video, i.e. once the video reaches its length,
-                    // again starts from the current position of left seekbar point
-                    if (binding.videoView.currentPosition >= binding.rangeSeekBar.selectedMaxValue.toInt() * 1000) {
-                        binding.videoView.seekTo(binding.rangeSeekBar.selectedMinValue.toInt() * 1000)
+                    if (binding.videoView.currentPosition >= videoSelectedUpperVal.floatValue.toInt() * 1000) {
+                        binding.videoView.seekTo(videoSelectedLowerVal.floatValue.toInt() * 1000)
                     }
                     handler.postDelayed(this, 1000)
                 }
             }, 0)
-
         }
     }
 
@@ -206,18 +215,6 @@ class MainActivity : AppCompatActivity() {
         val exe =
             "-y -i $input_video_uri -filter_complex [0:v]trim=0:${endMs / 1000},setpts=PTS-STARTPTS[v1];[0:v]trim=${startMs / 1000}:${endMs / 1000},reverse,setpts=PTS-STARTPTS[v2];[0:v]trim=${startMs / 1000},setpts=PTS-STARTPTS[v3];[v1][v2][v3]concat=n=3:v=1 -b:v 2097k -vcodec mpeg4 -crf 0 -preset superfast ${file.absolutePath}"
         executeFfmpegCommand(exe, file.absolutePath)
-    }
-
-    //This method returns the seconds in hh:mm:ss time format
-    private fun getTime(seconds: Int): String {
-        val hr = seconds / 3600
-        val rem = seconds % 3600
-        val mn = rem / 60
-        val sec = rem % 60
-        return String.format("%02d", hr) + ":" + String.format(
-            "%02d",
-            mn
-        ) + ":" + String.format("%02d", sec)
     }
 
     private fun executeFfmpegCommand(exe: String, filePath: String) {
