@@ -70,6 +70,38 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.composeButtonBar.setContent {
+            ControlPanelButtons(
+                firstClick = {
+                    if (input_video_uri != null) {
+                        slowMotion(
+                            binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
+                            binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
+                        )
+                    } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
+                        .show()
+                },
+                secondClick = {
+                    if (input_video_uri != null) {
+                        reverse(
+                            binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
+                            binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
+                        )
+                    } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
+                        .show()
+                },
+                thirdClick = {
+                    if (input_video_uri != null) {
+                        fastForward(
+                            binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
+                            binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
+                        )
+                    } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
+                        .show()
+                }
+            )
+        }
+
         binding.saveVideo.setOnClickListener {
             if (input_video_uri != null) {
                 //passing filename
@@ -80,39 +112,6 @@ class MainActivity : AppCompatActivity() {
         binding.selectVideo.setOnClickListener {
             handler.removeCallbacksAndMessages(null)
             selectVideoLauncher.launch("video/*")
-        }
-
-        binding.slow.setOnClickListener {
-            /*
-                    check if the user has selected any video or not
-                    In case a user hasen't selected any video and press the button,
-                    we will show an warning, stating "Please upload the video"
-            */
-            if (input_video_uri != null) {
-                slowMotion(
-                    binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
-                    binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
-                )
-            } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
-                .show()
-        }
-        binding.fast.setOnClickListener {
-            if (input_video_uri != null) {
-                fastForward(
-                    binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
-                    binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
-                )
-            } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
-                .show()
-        }
-        binding.reverse.setOnClickListener {
-            if (input_video_uri != null) {
-                reverse(
-                    binding.rangeSeekBar.selectedMinValue.toInt() * 1000,
-                    binding.rangeSeekBar.selectedMaxValue.toInt() * 1000
-                )
-            } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
-                .show()
         }
 
         /*

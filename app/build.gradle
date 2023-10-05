@@ -6,12 +6,12 @@ plugins {
 
 android {
     namespace 'com.raghav.gfgffmpeg'
-    compileSdk 33
+    compileSdk 34
 
     defaultConfig {
         applicationId "com.raghav.gfgffmpeg"
         minSdk 21
-        targetSdk 33
+        targetSdk 34
         versionCode 1
         versionName "1.0"
 
@@ -33,23 +33,34 @@ android {
     }
     buildFeatures{
         viewBinding true
+        compose true
     }
+
 }
 
 dependencies {
     implementation fileTree(dir: 'libs', include: ['*.jar'])
 
-    implementation 'androidx.core:core-ktx:1.9.0'
-    implementation 'androidx.appcompat:appcompat:1.5.1'
+    implementation 'androidx.core:core-ktx:1.12.0'
+    implementation 'androidx.appcompat:appcompat:1.6.1'
 
-    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.6.4'
-    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.6.4"
-    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.5.1"
+    implementation 'org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.3'
+    implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:1.7.3"
+    implementation "androidx.lifecycle:lifecycle-runtime-ktx:2.6.2"
 
-    implementation 'com.google.android.exoplayer:exoplayer-core:2.18.1'
-    implementation 'com.google.android.exoplayer:exoplayer-dash:2.18.1'
-    implementation 'com.google.android.exoplayer:exoplayer-ui:2.18.1'
+    implementation 'com.google.android.exoplayer:exoplayer-core:2.19.1'
+    implementation 'com.google.android.exoplayer:exoplayer-dash:2.19.1'
+    implementation 'com.google.android.exoplayer:exoplayer-ui:2.19.1'
 
     implementation 'com.arthenica:ffmpeg-kit-video:5.1.LTS'
     implementation 'org.florescu.android.rangeseekbar:rangeseekbar-library:0.3.0'
+
+    implementation("androidx.compose.ui:ui:1.5.2")
+    // Tooling support (Previews, etc.)
+    debugImplementation "androidx.compose.ui:ui-tooling:1.5.2"
+    implementation "androidx.compose.ui:ui-tooling-preview:1.5.2"
+    // Foundation (Border, Background, Box, Image, Scroll, shapes, animations, etc.)
+    implementation("androidx.compose.foundation:foundation:1.5.2")
+    // Material Design
+    implementation("androidx.compose.material:material:1.5.2")
 }
