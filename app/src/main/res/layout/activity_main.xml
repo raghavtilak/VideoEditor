@@ -7,37 +7,17 @@
     android:background="@drawable/gradient_relative_layout"
     tools:context=".MainActivity">
 
-
-    <Button
-        android:id="@+id/selectVideo"
+    <androidx.compose.ui.platform.ComposeView
+        android:id="@+id/compose_top_bar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_marginEnd="5dp"
-        android:layout_toStartOf="@id/saveVideo"
-        android:background="@drawable/buttonradius"
-        android:padding="10dp"
-        android:text="Select Video"
-        android:textColor="@color/white" />
-
-    <Button
-        android:id="@+id/saveVideo"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_alignParentTop="true"
-        android:layout_alignParentEnd="true"
-        android:background="@drawable/button_save"
-        android:padding="10dp"
-        android:text="Save"
-        android:textColor="@color/white" />
-
+        android:layout_height="wrap_content" />
 
     <VideoView
         android:id="@+id/videoView"
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_above="@+id/relative"
-        android:layout_below="@+id/selectVideo"
+        android:layout_below="@+id/compose_top_bar"
         android:layout_centerInParent="true" />
 
     <LinearLayout

@@ -9,11 +9,7 @@ import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.Column
-import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableFloatStateOf
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.lifecycle.lifecycleScope
 import com.arthenica.ffmpegkit.FFmpegKit
 import com.arthenica.ffmpegkit.FFmpegKitConfig
@@ -81,6 +77,19 @@ class MainActivity : AppCompatActivity() {
         binding = ActivityMainBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
+        binding.composeTopBar.setContent {
+            TopBar(selectClick = {
+                handler.removeCallbacksAndMessages(null)
+                selectVideoLauncher.launch("video/*")
+            }, saveClick = {
+                if (input_video_uri != null) {
+                    //passing filename
+                    saveVideoLauncher.launch("VID-${System.currentTimeMillis() / 1000}")
+                } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
+                    .show()
+            })
+        }
+
         binding.composeControlPanel.setContent {
             Column {
                 ScrubberPanel(
@@ -135,18 +144,6 @@ class MainActivity : AppCompatActivity() {
                     }
                 )
             }
-        }
-
-        binding.saveVideo.setOnClickListener {
-            if (input_video_uri != null) {
-                //passing filename
-                saveVideoLauncher.launch("VID-${System.currentTimeMillis() / 1000}")
-            } else Toast.makeText(this@MainActivity, "Please upload video", Toast.LENGTH_LONG)
-                .show()
-        }
-        binding.selectVideo.setOnClickListener {
-            handler.removeCallbacksAndMessages(null)
-            selectVideoLauncher.launch("video/*")
         }
 
         /*
