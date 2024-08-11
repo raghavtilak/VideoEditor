@@ -5,7 +5,8 @@ This app contains basic functionality to fast forward, slowmo and reverse either
 <br>
 [!["Buy Me A Coffee"](https://www.buymeacoffee.com/assets/img/custom_images/orange_img.png)](https://www.buymeacoffee.com/raghavtilak)
 
-
+# Explore the React Native Alternative
+[Video Editor React Native](https://github.com/raghavtilak/VideoEditor-react-native)
 
 ## Tech Stack
 
